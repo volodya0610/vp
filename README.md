@@ -55,3 +55,9 @@ export WG_PEER_ALLOWED_IPS="10.0.0.2/32"
 
 ./gradlew run
 ```
+
+## Запуск в IntelliJ IDEA
+
+1. Откройте проект через **File → Open** и выберите `build.gradle`.
+2. В настройках Gradle выберите встроенный Gradle из IDEA или установленный в системе.
+3. Создайте конфигурацию **Application** с main-классом `com.example.wg.Main` и задайте переменные окружения из раздела выше.
