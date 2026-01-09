@@ -61,6 +61,7 @@ wg_endpoint: "vpn.example.com:51820"
 wg_server_public_key: "<server_public_key>"
 wg_client_address: "10.0.0.2/32"
 wg_peer_allowed_ips: "10.0.0.2/32"
+wg_client_dns: "1.1.1.1,8.8.8.8"
 ```
 
 ```bash
@@ -73,6 +74,21 @@ export WG_CLIENT_ADDRESS="10.0.0.2/32"
 export WG_PEER_ALLOWED_IPS="10.0.0.2/32"
 
 ./gradlew run
+```
+
+## Сборка и запуск на сервере
+
+Соберите fat jar и запустите его так:
+
+```bash
+./gradlew shadowJar
+java -jar build/libs/wireguard-telegram-admin-1.0.0-all.jar
+```
+
+При необходимости можно указать путь к конфигу:
+
+```bash
+WG_CONFIG=/etc/wg-bot/config.yaml java -jar build/libs/wireguard-telegram-admin-1.0.0-all.jar
 ```
 
 ## Запуск в IntelliJ IDEA
