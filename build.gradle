@@ -10,6 +10,13 @@ tasks.withType(JavaCompile).configureEach {
     options.release = 17
 }
 
+tasks.processResources {
+    from('scripts') {
+        into 'scripts'
+        fileMode = 0755
+    }
+}
+
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(17)

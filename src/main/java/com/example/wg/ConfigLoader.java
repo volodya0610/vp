@@ -2,9 +2,12 @@ package com.example.wg;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.attribute.PosixFilePermission;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Locale;
@@ -35,6 +38,7 @@ public class ConfigLoader {
         String token = require(values, "BOT_TOKEN");
         Set<Long> adminIds = parseAdminIds(require(values, "ADMIN_IDS"));
         Path scriptsDir = resolvePath(values.getOrDefault("WG_SCRIPTS_DIR", "scripts"), baseDir);
+        scriptsDir = ensureScriptsDir(scriptsDir);
         Path clientDir = resolvePath(values.getOrDefault("WG_CLIENT_DIR", "/etc/wireguard/clients"), baseDir);
         String wgInterface = values.getOrDefault("WG_INTERFACE", "wg0");
 
@@ -90,6 +94,47 @@ public class ConfigLoader {
             return path;
         }
         return baseDir.resolve(path).normalize();
+    }
+
+    private static Path ensureScriptsDir(Path scriptsDir) {
+        if (Files.exists(scriptsDir)) {
+            return scriptsDir;
+        }
+        try {
+            Path tempDir = Files.createTempDirectory("wg-scripts-");
+            tempDir.toFile().deleteOnExit();
+            for (String script : scriptNames()) {
+                copyResource("scripts/" + script, tempDir.resolve(script));
+            }
+            return tempDir;
+        } catch (IOException e) {
+            throw new IllegalStateException("Failed to prepare scripts directory: " + scriptsDir, e);
+        }
+    }
+
+    private static void copyResource(String resource, Path target) throws IOException {
+        try (InputStream input = ConfigLoader.class.getClassLoader().getResourceAsStream(resource)) {
+            if (input == null) {
+                throw new IllegalStateException("Missing resource: " + resource);
+            }
+            try (OutputStream output = Files.newOutputStream(target)) {
+                input.transferTo(output);
+            }
+            setExecutable(target);
+        }
+    }
+
+    private static void setExecutable(Path target) throws IOException {
+        try {
+            Set<PosixFilePermission> perms = PosixFilePermissions.fromString("rwxr-xr-x");
+            Files.setPosixFilePermissions(target, perms);
+        } catch (UnsupportedOperationException ignored) {
+            target.toFile().setExecutable(true, false);
+        }
+    }
+
+    private static Set<String> scriptNames() {
+        return Set.of("wg-status.sh", "wg-list.sh", "wg-add.sh", "wg-revoke.sh");
     }
 
     private static String joinIterable(Iterable<?> iterable) {
