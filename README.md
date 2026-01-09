@@ -23,6 +23,7 @@
 | `WG_PEER_ALLOWED_IPS` | Allowed IPs для peer (обязателен для `/add`). |
 | `WG_CLIENT_DNS` | DNS-серверы для клиентского конфига (опционально). |
 | `WG_CONF` | Путь к конфигу сервера (по умолчанию: `/etc/wireguard/<WG_INTERFACE>.conf`). |
+| `WG_CONFIG` | Путь к YAML-файлу конфигурации (по умолчанию: `config.yaml` или `config.yml` в корне проекта). |
 
 ## Команды
 
@@ -43,6 +44,24 @@
 - Не запускайте бота с лишними привилегиями; при необходимости настройте `sudoers` для запуска скриптов.
 
 ## Локальный запуск
+
+Можно хранить настройки в `config.yaml` (или `config.yml`) в корне проекта. Переменные окружения имеют приоритет над YAML.
+
+Пример `config.yaml`:
+
+```yaml
+bot_token: "your_token"
+admin_ids:
+  - 123456789
+  - 987654321
+wg_interface: "wg0"
+wg_scripts_dir: "scripts"
+wg_client_dir: "/etc/wireguard/clients"
+wg_endpoint: "vpn.example.com:51820"
+wg_server_public_key: "<server_public_key>"
+wg_client_address: "10.0.0.2/32"
+wg_peer_allowed_ips: "10.0.0.2/32"
+```
 
 ```bash
 export BOT_TOKEN="your_token"

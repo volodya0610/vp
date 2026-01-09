@@ -6,15 +6,12 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
@@ -197,29 +194,15 @@ public class AdminBot extends TelegramLongPollingBot {
         return name.matches("[a-zA-Z0-9_-]{1,64}");
     }
 
-    public static AdminBot fromEnv() {
-        String token = envOrThrow("BOT_TOKEN");
-        Set<Long> adminIds = parseAdminIds(envOrThrow("ADMIN_IDS"));
-        Path scriptsDir = Paths.get(System.getenv().getOrDefault("WG_SCRIPTS_DIR", "scripts"));
-        Path clientDir = Paths.get(System.getenv().getOrDefault("WG_CLIENT_DIR", "/etc/wireguard/clients"));
-        String wgInterface = System.getenv().getOrDefault("WG_INTERFACE", "wg0");
-        return new AdminBot(token, adminIds, scriptsDir, clientDir, wgInterface);
-    }
-
-    private static String envOrThrow(String key) {
-        String value = System.getenv(key);
-        if (value == null || value.isBlank()) {
-            throw new IllegalStateException("Missing required env: " + key);
-        }
-        return value;
-    }
-
-    private static Set<Long> parseAdminIds(String value) {
-        return Arrays.stream(value.split(","))
-            .map(String::trim)
-            .filter(item -> !item.isEmpty())
-            .map(Long::valueOf)
-            .collect(Collectors.toSet());
+    public static AdminBot fromConfig() {
+        BotConfig config = ConfigLoader.load();
+        return new AdminBot(
+            config.botToken(),
+            config.adminIds(),
+            config.scriptsDir(),
+            config.clientDir(),
+            config.wgInterface()
+        );
     }
 
     private record ProcessResult(int exitCode, String output) {}
