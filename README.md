@@ -81,7 +81,7 @@ export WG_PEER_ALLOWED_IPS="10.0.0.2/32"
 Соберите fat jar и запустите его так:
 
 ```bash
-./gradlew shadowJar
+./gradlew fatJar
 java -jar build/libs/wireguard-telegram-admin-1.0.0-all.jar
 ```
 
