@@ -22,3 +22,9 @@ dependencies {
 application {
     mainClass = 'com.example.wg.Main'
 }
+
+jar {
+    manifest {
+        attributes 'Main-Class': application.mainClass.get()
+    }
+}
