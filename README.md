@@ -1,48 +1,48 @@
-# WireGuard Admin Telegram Bot
+# Telegram-бот для администрирования WireGuard
 
-This project provides a Telegram admin bot for managing WireGuard peers via local scripts.
+Этот проект предоставляет Telegram-бота для администрирования WireGuard через локальные скрипты.
 
-## Requirements
+## Требования
 
 - Java 17+
-- WireGuard tools (`wg`, `wg-quick`)
-- A Telegram bot token
+- Утилиты WireGuard (`wg`, `wg-quick`)
+- Токен Telegram-бота
 
-## Configuration (env vars)
+## Конфигурация (переменные окружения)
 
-| Variable | Description |
+| Переменная | Описание |
 | --- | --- |
-| `BOT_TOKEN` | Telegram bot token. |
-| `ADMIN_IDS` | Comma-separated list of admin Telegram IDs (only these users can run commands). |
-| `WG_INTERFACE` | WireGuard interface name (default: `wg0`). |
-| `WG_SCRIPTS_DIR` | Path to scripts directory (default: `scripts`). |
-| `WG_CLIENT_DIR` | Where client configs are stored (default: `/etc/wireguard/clients`). |
-| `WG_ENDPOINT` | Public endpoint for the server (required for `/add`). |
-| `WG_SERVER_PUBLIC_KEY` | Server public key (required for `/add`). |
-| `WG_CLIENT_ADDRESS` | Client address (required for `/add`). |
-| `WG_PEER_ALLOWED_IPS` | Allowed IPs for the peer (required for `/add`). |
-| `WG_CLIENT_DNS` | Optional DNS servers for client config. |
-| `WG_CONF` | Override server config path (default: `/etc/wireguard/<WG_INTERFACE>.conf`). |
+| `BOT_TOKEN` | Токен Telegram-бота. |
+| `ADMIN_IDS` | Список Telegram ID администраторов через запятую (только эти пользователи могут выполнять команды). |
+| `WG_INTERFACE` | Имя интерфейса WireGuard (по умолчанию: `wg0`). |
+| `WG_SCRIPTS_DIR` | Путь к директории со скриптами (по умолчанию: `scripts`). |
+| `WG_CLIENT_DIR` | Где хранить клиентские конфиги (по умолчанию: `/etc/wireguard/clients`). |
+| `WG_ENDPOINT` | Публичный endpoint сервера (обязателен для `/add`). |
+| `WG_SERVER_PUBLIC_KEY` | Публичный ключ сервера (обязателен для `/add`). |
+| `WG_CLIENT_ADDRESS` | Адрес клиента (обязателен для `/add`). |
+| `WG_PEER_ALLOWED_IPS` | Allowed IPs для peer (обязателен для `/add`). |
+| `WG_CLIENT_DNS` | DNS-серверы для клиентского конфига (опционально). |
+| `WG_CONF` | Путь к конфигу сервера (по умолчанию: `/etc/wireguard/<WG_INTERFACE>.conf`). |
 
-## Commands
+## Команды
 
-- `/status` → runs `scripts/wg-status.sh`
-- `/list` → runs `scripts/wg-list.sh`
-- `/add <name>` → runs `scripts/wg-add.sh <name>`
-- `/revoke <name>` → runs `scripts/wg-revoke.sh <name>`
-- `/config <name>` → sends the generated client config to the admin
+- `/status` → запускает `scripts/wg-status.sh`
+- `/list` → запускает `scripts/wg-list.sh`
+- `/add <name>` → запускает `scripts/wg-add.sh <name>`
+- `/revoke <name>` → запускает `scripts/wg-revoke.sh <name>`
+- `/config <name>` → отправляет сгенерированный клиентский конфиг администратору
 
-## Scripts
+## Скрипты
 
-The scripts use `WG_INTERFACE` and `WG_CLIENT_DIR` from the environment. Ensure the scripts are executable and that the bot user has permission to run them.
+Скрипты используют `WG_INTERFACE` и `WG_CLIENT_DIR` из окружения. Убедитесь, что скрипты исполняемые и у пользователя бота есть права на их запуск.
 
-### Security notes
+### Заметки по безопасности
 
-- Client configs are stored in `WG_CLIENT_DIR` with `0700` on the directory and `0600` on files.
-- The bot only serves `/config` to whitelisted admin IDs.
-- Avoid running the bot with unnecessary privileges; use sudoers rules to grant script access if needed.
+- Клиентские конфиги сохраняются в `WG_CLIENT_DIR` с правами `0700` на директорию и `0600` на файлы.
+- Бот отправляет `/config` только пользователям из белого списка администраторов.
+- Не запускайте бота с лишними привилегиями; при необходимости настройте `sudoers` для запуска скриптов.
 
-## Running locally
+## Локальный запуск
 
 ```bash
 export BOT_TOKEN="your_token"
