@@ -21,6 +21,7 @@ public class ConfigLoader {
     public static BotConfig load() {
         Map<String, String> values = new HashMap<>();
         Path configPath = resolveConfigPath();
+        Path baseDir = configPath != null ? configPath.toAbsolutePath().getParent() : Paths.get(".").toAbsolutePath().normalize();
         if (configPath != null && Files.exists(configPath)) {
             values.putAll(loadYaml(configPath));
         }
@@ -33,8 +34,8 @@ public class ConfigLoader {
 
         String token = require(values, "BOT_TOKEN");
         Set<Long> adminIds = parseAdminIds(require(values, "ADMIN_IDS"));
-        Path scriptsDir = Paths.get(values.getOrDefault("WG_SCRIPTS_DIR", "scripts"));
-        Path clientDir = Paths.get(values.getOrDefault("WG_CLIENT_DIR", "/etc/wireguard/clients"));
+        Path scriptsDir = resolvePath(values.getOrDefault("WG_SCRIPTS_DIR", "scripts"), baseDir);
+        Path clientDir = resolvePath(values.getOrDefault("WG_CLIENT_DIR", "/etc/wireguard/clients"), baseDir);
         String wgInterface = values.getOrDefault("WG_INTERFACE", "wg0");
 
         return new BotConfig(token, adminIds, scriptsDir, clientDir, wgInterface);
@@ -81,6 +82,14 @@ public class ConfigLoader {
         } catch (IOException e) {
             throw new IllegalStateException("Failed to read config: " + path, e);
         }
+    }
+
+    private static Path resolvePath(String value, Path baseDir) {
+        Path path = Paths.get(value);
+        if (path.isAbsolute()) {
+            return path;
+        }
+        return baseDir.resolve(path).normalize();
     }
 
     private static String joinIterable(Iterable<?> iterable) {
