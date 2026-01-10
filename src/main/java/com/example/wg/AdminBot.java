@@ -139,6 +139,14 @@ public class AdminBot extends TelegramLongPollingBot {
             sendText(chatId, "Script not found: " + scriptName);
             return;
         }
+        if (!Files.isExecutable(script)) {
+            try {
+                script.toFile().setExecutable(true, false);
+            } catch (SecurityException e) {
+                sendText(chatId, "Script is not executable: " + scriptName);
+                return;
+            }
+        }
 
         List<String> command = new ArrayList<>();
         command.add(script.toAbsolutePath().toString());
