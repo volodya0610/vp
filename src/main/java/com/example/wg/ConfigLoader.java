@@ -41,8 +41,11 @@ public class ConfigLoader {
         scriptsDir = ensureScriptsDir(scriptsDir);
         Path clientDir = resolvePath(values.getOrDefault("WG_CLIENT_DIR", "/etc/wireguard/clients"), baseDir);
         String wgInterface = values.getOrDefault("WG_INTERFACE", "wg0");
+        Map<String, String> extraEnv = values.entrySet().stream()
+            .filter(entry -> entry.getKey().startsWith("WG_"))
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
-        return new BotConfig(token, adminIds, scriptsDir, clientDir, wgInterface);
+        return new BotConfig(token, adminIds, scriptsDir, clientDir, wgInterface, extraEnv);
     }
 
     private static Path resolveConfigPath() {

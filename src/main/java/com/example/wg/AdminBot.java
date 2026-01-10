@@ -10,6 +10,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
@@ -26,13 +27,15 @@ public class AdminBot extends TelegramLongPollingBot {
     private final Path scriptsDir;
     private final Path clientDir;
     private final String wgInterface;
+    private final Map<String, String> extraEnv;
 
-    public AdminBot(String botToken, Set<Long> adminIds, Path scriptsDir, Path clientDir, String wgInterface) {
+    public AdminBot(String botToken, Set<Long> adminIds, Path scriptsDir, Path clientDir, String wgInterface, Map<String, String> extraEnv) {
         this.botToken = Objects.requireNonNull(botToken, "botToken");
         this.adminIds = Objects.requireNonNull(adminIds, "adminIds");
         this.scriptsDir = Objects.requireNonNull(scriptsDir, "scriptsDir");
         this.clientDir = Objects.requireNonNull(clientDir, "clientDir");
         this.wgInterface = Objects.requireNonNull(wgInterface, "wgInterface");
+        this.extraEnv = Objects.requireNonNull(extraEnv, "extraEnv");
     }
 
     @Override
@@ -172,6 +175,7 @@ public class AdminBot extends TelegramLongPollingBot {
         ProcessBuilder builder = new ProcessBuilder(command);
         builder.environment().put("WG_INTERFACE", wgInterface);
         builder.environment().putIfAbsent("WG_CLIENT_DIR", clientDir.toAbsolutePath().toString());
+        builder.environment().putAll(extraEnv);
         builder.redirectErrorStream(true);
 
         Process process = builder.start();
@@ -209,7 +213,8 @@ public class AdminBot extends TelegramLongPollingBot {
             config.adminIds(),
             config.scriptsDir(),
             config.clientDir(),
-            config.wgInterface()
+            config.wgInterface(),
+            config.extraEnv()
         );
     }
 

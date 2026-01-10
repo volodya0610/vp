@@ -1,6 +1,7 @@
 package com.example.wg;
 
 import java.nio.file.Path;
+import java.util.Map;
 import java.util.Set;
 
 public record BotConfig(
@@ -8,5 +9,6 @@ public record BotConfig(
     Set<Long> adminIds,
     Path scriptsDir,
     Path clientDir,
-    String wgInterface
+    String wgInterface,
+    Map<String, String> extraEnv
 ) {}
