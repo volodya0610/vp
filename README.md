@@ -21,6 +21,7 @@
 | `WG_SERVER_PUBLIC_KEY` | Публичный ключ сервера (обязателен для `/add`). |
 | `WG_CLIENT_ADDRESS` | Адрес клиента (обязателен для `/add`). |
 | `WG_PEER_ALLOWED_IPS` | Allowed IPs для peer (обязателен для `/add`). |
+| `WG_CLIENT_ALLOWED_IPS` | Allowed IPs в клиентском конфиге (по умолчанию: `0.0.0.0/0, ::/0`). |
 | `WG_CLIENT_DNS` | DNS-серверы для клиентского конфига (опционально). |
 | `WG_CONF` | Путь к конфигу сервера (по умолчанию: `/etc/wireguard/<WG_INTERFACE>.conf`). |
 | `WG_CONFIG` | Путь к YAML-файлу конфигурации (по умолчанию: `config.yaml` или `config.yml` в корне проекта). |
@@ -62,6 +63,7 @@ wg_endpoint: "vpn.example.com:51820"
 wg_server_public_key: "<server_public_key>"
 wg_client_address: "10.0.0.2/32"
 wg_peer_allowed_ips: "10.0.0.2/32"
+wg_client_allowed_ips: "0.0.0.0/0, ::/0"
 wg_client_dns: "1.1.1.1,8.8.8.8"
 ```
 
