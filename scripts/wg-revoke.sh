@@ -26,7 +26,7 @@ trap 'rm -f "$TMP_CONF"' EXIT
 
 awk -v name="$NAME" '
   $0 ~ "^# peer: " name "$" {skip=1; next}
-  skip && $0 ~ "^\[Peer\]$" {next}
+  skip && $0 ~ "^\\[Peer\\]$" {next}
   skip && $0 ~ "^$" {skip=0; next}
   skip {next}
   {print}
