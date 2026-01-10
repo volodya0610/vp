@@ -19,12 +19,56 @@ WG_ENDPOINT="${WG_ENDPOINT:-}"
 WG_SERVER_PUBLIC_KEY="${WG_SERVER_PUBLIC_KEY:-}"
 WG_CLIENT_ADDRESS="${WG_CLIENT_ADDRESS:-}"
 WG_PEER_ALLOWED_IPS="${WG_PEER_ALLOWED_IPS:-}"
+WG_PEER_BASE="${WG_PEER_BASE:-}"
 WG_CLIENT_ALLOWED_IPS="${WG_CLIENT_ALLOWED_IPS:-0.0.0.0/0, ::/0}"
 WG_CLIENT_DNS="${WG_CLIENT_DNS:-}"
 
-if [[ -z "$WG_ENDPOINT" || -z "$WG_SERVER_PUBLIC_KEY" || -z "$WG_CLIENT_ADDRESS" || -z "$WG_PEER_ALLOWED_IPS" ]]; then
-  echo "Missing required env: WG_ENDPOINT, WG_SERVER_PUBLIC_KEY, WG_CLIENT_ADDRESS, WG_PEER_ALLOWED_IPS" >&2
+if [[ -z "$WG_ENDPOINT" || -z "$WG_SERVER_PUBLIC_KEY" || -z "$WG_CLIENT_ADDRESS" ]]; then
+  echo "Missing required env: WG_ENDPOINT, WG_SERVER_PUBLIC_KEY, WG_CLIENT_ADDRESS" >&2
   exit 1
+fi
+
+if [[ -z "$WG_PEER_ALLOWED_IPS" ]]; then
+  if [[ -z "$WG_PEER_BASE" ]]; then
+    echo "Missing required env: WG_PEER_ALLOWED_IPS or WG_PEER_BASE" >&2
+    exit 1
+  fi
+  WG_PEER_ALLOWED_IPS=$(awk -v base="$WG_PEER_BASE" '
+    function ip_to_int(ip,    a) { split(ip, a, "."); return (a[1]*16777216)+(a[2]*65536)+(a[3]*256)+a[4]; }
+    function int_to_ip(n,    a,b,c,d) { a=int(n/16777216); n%=16777216; b=int(n/65536); n%=65536; c=int(n/256); d=n%256; return a"."b"."c"."d; }
+    BEGIN {
+      split(base, parts, "/");
+      if (parts[2] != 24) { print ""; exit 0; }
+      net = ip_to_int(parts[1]);
+      for (i = 2; i <= 254; i++) { used[int_to_ip(net + i)] = 0; }
+    }
+    /AllowedIPs =/ {
+      gsub(/AllowedIPs = /, "", $0);
+      split($0, items, ",");
+      for (i in items) {
+        gsub(/^[ \t]+|[ \t]+$/, "", items[i]);
+        if (items[i] ~ /^[0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+\\/32$/) {
+          split(items[i], ipcidr, "/");
+          used[ipcidr[1]] = 1;
+        }
+      }
+    }
+    END {
+      for (i = 2; i <= 254; i++) {
+        ip = int_to_ip(net + i);
+        if (!(ip in used) || used[ip] == 0) {
+          print ip "/32";
+          exit 0;
+        }
+      }
+      print "";
+    }
+  ' "$WG_CONF")
+
+  if [[ -z "$WG_PEER_ALLOWED_IPS" ]]; then
+    echo "Failed to allocate peer IP from WG_PEER_BASE=$WG_PEER_BASE" >&2
+    exit 1
+  fi
 fi
 
 umask 077
