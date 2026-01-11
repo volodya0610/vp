@@ -40,7 +40,7 @@ if [[ -z "$WG_PEER_ALLOWED_IPS" ]]; then
       split(base, parts, "/");
       if (parts[2] != 24) { print ""; exit 0; }
       net = ip_to_int(parts[1]);
-      for (i = 2; i <= 254; i++) { used[int_to_ip(net + i)] = 0; }
+      max = net + 1;
     }
     /AllowedIPs =/ {
       gsub(/AllowedIPs = /, "", $0);
@@ -49,19 +49,23 @@ if [[ -z "$WG_PEER_ALLOWED_IPS" ]]; then
         gsub(/^[ \t]+|[ \t]+$/, "", items[i]);
         if (items[i] ~ /^[0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+\\/32$/) {
           split(items[i], ipcidr, "/");
-          used[ipcidr[1]] = 1;
+          val = ip_to_int(ipcidr[1]);
+          if (val > max) {
+            max = val;
+          }
         }
       }
     }
     END {
-      for (i = 2; i <= 254; i++) {
-        ip = int_to_ip(net + i);
-        if (!(ip in used) || used[ip] == 0) {
-          print ip "/32";
-          exit 0;
-        }
+      candidate = max + 1;
+      if (candidate < net + 2) {
+        candidate = net + 2;
       }
-      print "";
+      if (candidate > net + 254) {
+        print "";
+        exit 0;
+      }
+      print int_to_ip(candidate) "/32";
     }
   ' "$WG_CONF")
 
