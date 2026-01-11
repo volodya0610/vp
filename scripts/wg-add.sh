@@ -71,6 +71,11 @@ if [[ -z "$WG_PEER_ALLOWED_IPS" ]]; then
   fi
 fi
 
+if [[ "$WG_PEER_ALLOWED_IPS" == *"0.0.0.0/0"* || "$WG_PEER_ALLOWED_IPS" == *"::/0"* ]]; then
+  echo "WG_PEER_ALLOWED_IPS must be a unique /32 (например, 10.7.0.20/32), not 0.0.0.0/0." >&2
+  exit 1
+fi
+
 umask 077
 mkdir -p "$WG_CLIENT_DIR"
 chmod 700 "$WG_CLIENT_DIR"
@@ -102,11 +107,12 @@ chmod 600 "$WG_CLIENT_DIR/${NAME}.conf"
 
 cat <<PEER >> "$WG_CONF"
 
-# peer: ${NAME}
+# BEGIN_PEER ${NAME}
 [Peer]
 PublicKey = ${CLIENT_PUB_KEY}
 PresharedKey = ${CLIENT_PRESHARED_KEY}
 AllowedIPs = ${WG_PEER_ALLOWED_IPS}
+# END_PEER ${NAME}
 PEER
 
 wg syncconf "$WG_INTERFACE" <(wg-quick strip "$WG_INTERFACE")

@@ -25,6 +25,8 @@ TMP_CONF=$(mktemp)
 trap 'rm -f "$TMP_CONF"' EXIT
 
 awk -v name="$NAME" '
+  $0 ~ "^# BEGIN_PEER " name "$" {skip=1; next}
+  $0 ~ "^# END_PEER " name "$" {skip=0; next}
   $0 ~ "^# peer: " name "$" {skip=1; next}
   skip && $0 ~ "^\\[Peer\\]$" {next}
   skip && $0 ~ "^$" {skip=0; next}
