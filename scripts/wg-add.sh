@@ -47,11 +47,13 @@ if [[ -z "$WG_PEER_ALLOWED_IPS" ]]; then
       split($0, items, ",");
       for (i in items) {
         gsub(/^[ \t]+|[ \t]+$/, "", items[i]);
-        if (items[i] ~ /^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+\/32$/) {
+        if (items[i] ~ /^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+\/[0-9]+$/) {
           split(items[i], ipcidr, "/");
-          val = ip_to_int(ipcidr[1]);
-          if (val > max) {
-            max = val;
+          if (ipcidr[2] == 32) {
+            val = ip_to_int(ipcidr[1]);
+            if (val > max) {
+              max = val;
+            }
           }
         }
       }
