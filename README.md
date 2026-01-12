@@ -19,7 +19,7 @@
 | `WG_CLIENT_DIR` | Где хранить клиентские конфиги (по умолчанию: `/etc/wireguard/clients`). |
 | `WG_ENDPOINT` | Публичный endpoint сервера (обязателен для `/add`). |
 | `WG_SERVER_PUBLIC_KEY` | Публичный ключ сервера (обязателен для `/add`). |
-| `WG_CLIENT_ADDRESS` | Адрес клиента (обязателен для `/add`). |
+| `WG_CLIENT_ADDRESS` | Адрес клиента (если не задан или не совпадает с peer, берётся из `WG_PEER_ALLOWED_IPS` и подсети `WG_PEER_BASE`). |
 | `WG_PEER_ALLOWED_IPS` | Allowed IPs для peer (уникальный `/32`, например `10.7.0.20/32`). |
 | `WG_PEER_BASE` | Базовая подсеть для автогенерации `WG_PEER_ALLOWED_IPS` (например, `10.7.0.0/24`). |
 | `WG_CLIENT_ALLOWED_IPS` | Allowed IPs в клиентском конфиге (по умолчанию: `0.0.0.0/0, ::/0`). |
@@ -62,7 +62,7 @@ wg_scripts_dir: "scripts"
 wg_client_dir: "/etc/wireguard/clients"
 wg_endpoint: "vpn.example.com:51820"
 wg_server_public_key: "<server_public_key>"
-wg_client_address: "10.0.0.2/32"
+wg_client_address: ""
 wg_peer_allowed_ips: ""
 wg_peer_base: "10.0.0.0/24"
 wg_client_allowed_ips: "0.0.0.0/0, ::/0"
@@ -75,7 +75,6 @@ export ADMIN_IDS="123456789,987654321"
 export WG_INTERFACE="wg0"
 export WG_ENDPOINT="vpn.example.com:51820"
 export WG_SERVER_PUBLIC_KEY="<server_public_key>"
-export WG_CLIENT_ADDRESS="10.0.0.2/32"
 export WG_PEER_ALLOWED_IPS="10.0.0.2/32"
 
 ./gradlew run

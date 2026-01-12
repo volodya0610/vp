@@ -23,8 +23,8 @@ WG_PEER_BASE="${WG_PEER_BASE:-}"
 WG_CLIENT_ALLOWED_IPS="${WG_CLIENT_ALLOWED_IPS:-0.0.0.0/0, ::/0}"
 WG_CLIENT_DNS="${WG_CLIENT_DNS:-}"
 
-if [[ -z "$WG_ENDPOINT" || -z "$WG_SERVER_PUBLIC_KEY" || -z "$WG_CLIENT_ADDRESS" ]]; then
-  echo "Missing required env: WG_ENDPOINT, WG_SERVER_PUBLIC_KEY, WG_CLIENT_ADDRESS" >&2
+if [[ -z "$WG_ENDPOINT" || -z "$WG_SERVER_PUBLIC_KEY" ]]; then
+  echo "Missing required env: WG_ENDPOINT, WG_SERVER_PUBLIC_KEY" >&2
   exit 1
 fi
 
@@ -78,6 +78,40 @@ fi
 if [[ "$WG_PEER_ALLOWED_IPS" == *"0.0.0.0/0"* || "$WG_PEER_ALLOWED_IPS" == *"::/0"* ]]; then
   echo "WG_PEER_ALLOWED_IPS must be a unique /32 (например, 10.7.0.20/32), not 0.0.0.0/0." >&2
   exit 1
+fi
+
+WG_CLIENT_IPV4=$(awk -v ips="$WG_PEER_ALLOWED_IPS" '
+  BEGIN {
+    n = split(ips, items, ",");
+    for (i = 1; i <= n; i++) {
+      gsub(/^[ \t]+|[ \t]+$/, "", items[i]);
+      if (items[i] ~ /^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+\/32$/) {
+        split(items[i], ipcidr, "/");
+        print ipcidr[1];
+        exit;
+      }
+    }
+  }
+')
+
+if [[ -z "$WG_CLIENT_IPV4" ]]; then
+  echo "Missing IPv4 in WG_PEER_ALLOWED_IPS=$WG_PEER_ALLOWED_IPS" >&2
+  exit 1
+fi
+
+WG_CLIENT_PREFIX="24"
+if [[ -n "$WG_PEER_BASE" ]]; then
+  WG_CLIENT_PREFIX=$(awk -F'/' '{print $2}' <<< "$WG_PEER_BASE")
+fi
+
+if [[ -z "$WG_CLIENT_PREFIX" ]]; then
+  WG_CLIENT_PREFIX="24"
+fi
+
+WG_CLIENT_DERIVED_ADDRESS="${WG_CLIENT_IPV4}/${WG_CLIENT_PREFIX}"
+
+if [[ -z "$WG_CLIENT_ADDRESS" || "$WG_CLIENT_ADDRESS" != "$WG_CLIENT_DERIVED_ADDRESS" ]]; then
+  WG_CLIENT_ADDRESS="$WG_CLIENT_DERIVED_ADDRESS"
 fi
 
 umask 077
