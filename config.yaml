@@ -1,0 +1,14 @@
+bot_token: "your_token"
+admin_ids:
+  - 123456789
+  - 987654321
+wg_interface: "wg0"
+wg_scripts_dir: "scripts"
+wg_client_dir: "/etc/wireguard/clients"
+wg_endpoint: ""
+wg_server_public_key: ""
+wg_client_address: ""
+wg_peer_allowed_ips: ""
+wg_peer_base: "10.7.0.0/24"
+wg_client_allowed_ips: "0.0.0.0/0, ::/0"
+wg_client_dns: "8.8.8.8"
