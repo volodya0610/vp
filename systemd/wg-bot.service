@@ -1,0 +1,16 @@
+[Unit]
+Description=WireGuard Telegram Admin Bot
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/etc/wg-bot
+ExecStart=/usr/bin/java -jar /etc/wg-bot/wireguard-telegram-admin-1.0.0-all.jar
+Restart=always
+RestartSec=5s
+User=root
+Environment=WG_CONFIG=/etc/wg-bot/config.yaml
+
+[Install]
+WantedBy=multi-user.target

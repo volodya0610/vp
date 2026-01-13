@@ -1,0 +1,57 @@
+plugins {
+    id 'application'
+}
+
+group = 'com.example'
+version = '1.0.0'
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.release = 17
+}
+
+tasks.processResources {
+    from('scripts') {
+        into 'scripts'
+        fileMode = 0755
+    }
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.telegram:telegrambots:6.9.7.1'
+    implementation 'org.yaml:snakeyaml:2.2'
+    implementation 'org.slf4j:slf4j-simple:2.0.12'
+}
+
+application {
+    mainClass = 'com.example.wg.Main'
+}
+
+jar {
+    manifest {
+        attributes 'Main-Class': application.mainClass.get()
+    }
+}
+
+tasks.register('fatJar', Jar) {
+    archiveClassifier = 'all'
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    from sourceSets.main.output
+    dependsOn configurations.runtimeClasspath
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    manifest {
+        attributes 'Main-Class': application.mainClass.get()
+    }
+}
